@@ -5,7 +5,7 @@ def create_and_run_reachability_analyzer(source_arn, destination_arn):
     client = boto3.client('ec2')
 
     try:
-        # Create a Reachability Analyzer Path
+        # Create a Network Insights Path
         response = client.create_network_insights_path(
             Source=source_arn,
             Destination=destination_arn,
@@ -38,19 +38,28 @@ def create_and_run_reachability_analyzer(source_arn, destination_arn):
         
         # Check the analysis result
         if status == 'succeeded':
-            # print(analysis_result)
-            path_found = analysis_result['NetworkInsightsAnalyses'][0]['NetworkPathFound']
-            if path_found:
-                print("Path is reachable")
+            analysis = analysis_result['NetworkInsightsAnalyses'][0]
+            if 'NetworkPathFound' in analysis:
+                path_found = analysis['NetworkPathFound']
+                if path_found:
+                    print(f"Path from {source_arn} to {destination_arn} is reachable")
+                else:
+                    print(f"Path from {source_arn} to {destination_arn} is not reachable")
             else:
-                print("Path is not reachable")
+                print(f"Analysis completed but 'NetworkPathFound' key not found in the response for path from {source_arn} to {destination_arn}")
         else:
-            print(f"Analysis failed with status: {status}")
+            print(f"Analysis failed with status: {status} for path from {source_arn} to {destination_arn}")
     
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"An error occurred for path from {source_arn} to {destination_arn}: {e}")
 
 if __name__ == "__main__":
-    source_arn = 'arn:aws:ec2:ap-east-1:424075490046:transit-gateway/tgw-0285f54acefc9a596'
-    destination_arn = 'arn:aws:ec2:ap-east-1:424075490046:transit-gateway-attachment/tgw-attach-01dce24c9315fc3af'
-    create_and_run_reachability_analyzer(source_arn, destination_arn)
+    arn_pairs = [
+        ('arn:aws:ec2:ap-east-1:424075490046:transit-gateway/tgw-0285f54acefc9a596', 'arn:aws:ec2:ap-east-1:424075490046:transit-gateway-attachment/tgw-attach-01dce24c9315fc3af'),
+        ('arn:aws:ec2:ap-east-1:424075490046:transit-gateway/tgw-0285f54acefc9a596', 'arn:aws:ec2:ap-east-1:424075490046:transit-gateway-attachment/tgw-attach-0951651d60bf8cb88'),
+        ('arn:aws:ec2:ap-east-1:424075490046:transit-gateway/tgw-0285f54acefc9a596', 'arn:aws:ec2:ap-east-1:424075490046:transit-gateway-attachment/tgw-attach-0858e3bddfab23d47'),
+        # Add more (source_arn, destination_arn) pairs here
+    ]
+    
+    for source_arn, destination_arn in arn_pairs:
+        create_and_run_reachability_analyzer(source_arn, destination_arn)
