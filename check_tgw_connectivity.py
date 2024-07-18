@@ -53,13 +53,18 @@ def create_and_run_reachability_analyzer(source_arn, destination_arn):
     except Exception as e:
         print(f"An error occurred for path from {source_arn} to {destination_arn}: {e}")
 
+def read_arn_pairs(file_path):
+    arn_pairs = []
+    with open(file_path, 'r') as file:
+        for line in file:
+            line = line.strip()
+            if line and not line.startswith('#'):  # Ignore empty lines and comments
+                source_arn, destination_arn = line.split(',')
+                arn_pairs.append((source_arn.strip(), destination_arn.strip()))
+    return arn_pairs
+
 if __name__ == "__main__":
-    arn_pairs = [
-        ('arn:aws:ec2:ap-east-1:424075490046:transit-gateway/tgw-0285f54acefc9a596', 'arn:aws:ec2:ap-east-1:424075490046:transit-gateway-attachment/tgw-attach-01dce24c9315fc3af'),
-        ('arn:aws:ec2:ap-east-1:424075490046:transit-gateway/tgw-0285f54acefc9a596', 'arn:aws:ec2:ap-east-1:424075490046:transit-gateway-attachment/tgw-attach-0951651d60bf8cb88'),
-        ('arn:aws:ec2:ap-east-1:424075490046:transit-gateway/tgw-0285f54acefc9a596', 'arn:aws:ec2:ap-east-1:424075490046:transit-gateway-attachment/tgw-attach-0858e3bddfab23d47'),
-        # Add more (source_arn, destination_arn) pairs here
-    ]
+    arn_pairs = read_arn_pairs('arn_pairs.txt')
     
     for source_arn, destination_arn in arn_pairs:
         create_and_run_reachability_analyzer(source_arn, destination_arn)
