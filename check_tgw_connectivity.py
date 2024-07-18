@@ -1,5 +1,6 @@
 import boto3
 import time
+import concurrent.futures
 
 def create_and_run_reachability_analyzer(source_arn, destination_arn):
     client = boto3.client('ec2')
@@ -31,7 +32,7 @@ def create_and_run_reachability_analyzer(source_arn, destination_arn):
             )
             status = analysis_result['NetworkInsightsAnalyses'][0]['Status']
             if status == 'running':
-                print("Analysis is running, waiting for it to complete...")
+                print(f"Analysis {analysis_id} is running, waiting for it to complete...")
                 time.sleep(10)  # Wait for 10 seconds before checking again
             else:
                 break
@@ -65,6 +66,12 @@ def read_arn_pairs(file_path):
 
 if __name__ == "__main__":
     arn_pairs = read_arn_pairs('arn_pairs.txt')
-    
-    for source_arn, destination_arn in arn_pairs:
-        create_and_run_reachability_analyzer(source_arn, destination_arn)
+
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = [executor.submit(create_and_run_reachability_analyzer, source_arn, destination_arn) for source_arn, destination_arn in arn_pairs]
+        
+        for future in concurrent.futures.as_completed(futures):
+            try:
+                future.result()  # This will re-raise any exceptions caught in the worker threads
+            except Exception as e:
+                print(f"An exception occurred: {e}")
