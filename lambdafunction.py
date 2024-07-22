@@ -2,8 +2,11 @@ import boto3
 import time
 import concurrent.futures
 
+sns_client = boto3.client('sns')
+
 def create_and_run_reachability_analyzer(source_arn, destination_arn):
     client = boto3.client('ec2')
+    not_reachable_message = ""
 
     try:
         # Create a Network Insights Path
@@ -45,7 +48,8 @@ def create_and_run_reachability_analyzer(source_arn, destination_arn):
                 if path_found:
                     print(f"Path from {source_arn} to {destination_arn} is reachable")
                 else:
-                    print(f"Path from {source_arn} to {destination_arn} is not reachable")
+                    not_reachable_message = f"Path from {source_arn} to {destination_arn} is not reachable"
+                    print(not_reachable_message)
             else:
                 print(f"Analysis completed but 'NetworkPathFound' key not found in the response for path from {source_arn} to {destination_arn}")
         else:
@@ -53,16 +57,33 @@ def create_and_run_reachability_analyzer(source_arn, destination_arn):
     
     except Exception as e:
         print(f"An error occurred for path from {source_arn} to {destination_arn}: {e}")
+    
+    return not_reachable_message
+
+def send_alert(message, sns_topic_arn):
+    response = sns_client.publish(
+        TopicArn=sns_topic_arn,
+        Message=message,
+        Subject='Network Path Reachability Alert'
+    )
+    print(f"Alert sent. Message ID: {response['MessageId']}")
 
 def lambda_handler(event, context):
     arn_pairs = event.get('arn_pairs', [])
-    
+    sns_topic_arn = event.get('sns_topic_arn', '')
+    not_reachable_messages = []
+
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(create_and_run_reachability_analyzer, source_arn, destination_arn) for source_arn, destination_arn in arn_pairs]
         
         for future in concurrent.futures.as_completed(futures):
             try:
-                future.result()  # This will re-raise any exceptions caught in the worker threads
+                not_reachable_message = future.result()  # This will re-raise any exceptions caught in the worker threads
+                if not_reachable_message:
+                    not_reachable_messages.append(not_reachable_message)
             except Exception as e:
                 print(f"An exception occurred: {e}")
-
+    
+    if not_reachable_messages:
+        message = '\n'.join(not_reachable_messages)
+        send_alert(message, sns_topic_arn)
