@@ -1,6 +1,7 @@
 import boto3
 import time
 import concurrent.futures
+import json
 
 sns_client = boto3.client('sns')
 
@@ -69,8 +70,13 @@ def send_alert(message, sns_topic_arn):
     print(f"Alert sent. Message ID: {response['MessageId']}")
 
 def lambda_handler(event, context):
-    arn_pairs = event.get('arn_pairs', [])
-    sns_topic_arn = event.get('sns_topic_arn', '')
+    # Read the JSON data from the file
+    file_path = './event.json'  # Update with the correct file path
+    with open(file_path, 'r') as file:
+        data = json.load(file)
+    
+    arn_pairs = data.get('arn_pairs', [])
+    sns_topic_arn = data.get('sns_topic_arn', '')
     not_reachable_messages = []
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
