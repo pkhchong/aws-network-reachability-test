@@ -1,0 +1,38 @@
+[
+  {
+    "ParameterKey": "LambdaS3Bucket",
+    "ParameterValue": "inspector-report-75897"
+  },
+  {
+    "ParameterKey": "LambdaS3Key",
+    "ParameterValue": "reachability-test-lambda.zip"
+  },
+  {
+    "ParameterKey": "LambdaFunctionName",
+    "ParameterValue": "reachability-test-2"
+  },
+  {
+    "ParameterKey": "LambdaHandler",
+    "ParameterValue": "lambda_function.lambda_handler"
+  },
+  {
+    "ParameterKey": "LambdaRuntime",
+    "ParameterValue": "python3.10"
+  },
+  {
+    "ParameterKey": "LambdaTimeout",
+    "ParameterValue": "800"
+  },
+  {
+    "ParameterKey": "LambdaMemorySize",
+    "ParameterValue": "128"
+  },
+  {
+    "ParameterKey": "ProjectName",
+    "ParameterValue": "Infra-Mgmt"
+  },
+  {
+    "ParameterKey": "Owner",
+    "ParameterValue": "pkhchong"
+  }
+]

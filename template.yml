@@ -1,0 +1,92 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template to deploy a Python Lambda triggered by EventBridge with NetworkManagerFullAccess role
+
+Parameters:
+  LambdaS3Bucket:
+    Type: String
+    Description: The S3 bucket where the Lambda code is stored
+  LambdaS3Key:
+    Type: String
+    Description: The S3 key of the Lambda zip file
+  LambdaFunctionName:
+    Type: String
+    Description: The name of the Lambda function
+  LambdaHandler:
+    Type: String
+    Default: "lambda_function.lambda_handler"
+    Description: The handler for the Lambda function
+  LambdaRuntime:
+    Type: String
+    Default: "python3.8"
+    Description: The runtime for the Lambda function
+  LambdaTimeout:
+    Type: Number
+    Default: 30
+    Description: The timeout in seconds for the Lambda function
+  LambdaMemorySize:
+    Type: Number
+    Default: 128
+    Description: The memory size in MB for the Lambda function
+  ProjectName:
+    Type: String
+    Description: Name of the project
+  Owner:
+    Type: String
+    Description: Owner of the Lambda function
+
+Resources:
+  NetworkManagerFullAccessRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: NetworkManagerFullAccess
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSNSFullAccess
+        - arn:aws:iam::aws:policy/AmazonVPCReachabilityAnalyzerFullAccessPolicy
+      Tags:
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Owner
+          Value: !Ref Owner
+
+  MyLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Ref LambdaFunctionName
+      Handler: !Ref LambdaHandler
+      Role: !GetAtt NetworkManagerFullAccessRole.Arn
+      Code:
+        S3Bucket: !Ref LambdaS3Bucket
+        S3Key: !Ref LambdaS3Key
+      Runtime: !Ref LambdaRuntime
+      Timeout: !Ref LambdaTimeout
+      MemorySize: !Ref LambdaMemorySize
+      Tags:
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Owner
+          Value: !Ref Owner
+
+  EventRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: !Sub "${LambdaFunctionName}EventRule"
+      ScheduleExpression: cron(0 0 * * ? *)
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt MyLambdaFunction.Arn
+          Id: "MyLambdaTarget"
+
+  LambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref MyLambdaFunction
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt EventRule.Arn
