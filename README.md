@@ -27,7 +27,11 @@ zip the reachability-test-lambda.zip
 zip reachability-test-lambda.zip lambda_function.py event.json
 ```
 
-upload reachability-test-lambda.zip to s3 bucket inspector-report-75897 in AWS main account
+create a s3 bucket and upload a zip file to the bucket
+
+modify the prod-param.json with the s3 bucket that you store the zip file
+
+deploy the cloudformation stack
 ```
 ./prod-deploy.sh
 ```
