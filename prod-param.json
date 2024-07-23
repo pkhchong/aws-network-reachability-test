@@ -1,7 +1,7 @@
 [
   {
     "ParameterKey": "LambdaS3Bucket",
-    "ParameterValue": "inspector-report-75897"
+    "ParameterValue": "temp-bucket-for-lambdacodeupload"
   },
   {
     "ParameterKey": "LambdaS3Key",
