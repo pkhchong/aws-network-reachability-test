@@ -2,10 +2,36 @@ import boto3
 import time
 import concurrent.futures
 
+def get_instance_id_by_tag(tag_key, tag_value):
+    ec2 = boto3.client('ec2')
+    response = ec2.describe_instances(Filters=[
+        {'Name': f'tag:{tag_key}', 'Values': [tag_value]}
+    ])
+    instances = response['Reservations']
+    if instances:
+        return instances[0]['Instances'][0]['InstanceId']
+    else:
+        return None
+
 def create_and_run_reachability_analyzer(source_arn, destination_arn):
     client = boto3.client('ec2')
 
     try:
+        # Check if source_arn and destination_arn contain the instance_tag keyword
+        if 'instance_tag_' in source_arn and '%%%' in source_arn:
+            tag_key, tag_value = source_arn.split('instance_tag_')[1].split('%%%')
+            source_arn = get_instance_id_by_tag(tag_key, tag_value)
+            if not source_arn:
+                print(f"Failed to retrieve instance ID for source ARN: {source_arn}")
+                return
+        
+        if 'instance_tag_' in destination_arn and '%%%' in destination_arn:
+            tag_key, tag_value = destination_arn.split('instance_tag_')[1].split('%%%')
+            destination_arn = get_instance_id_by_tag(tag_key, tag_value)
+            if not destination_arn:
+                print(f"Failed to retrieve instance ID for destination ARN: {destination_arn}")
+                return
+
         # Create a Network Insights Path
         response = client.create_network_insights_path(
             Source=source_arn,
