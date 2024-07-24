@@ -2,6 +2,7 @@ import boto3
 import time
 import concurrent.futures
 import json
+import re
 
 sns_client = boto3.client('sns')
 
@@ -36,13 +37,24 @@ def create_and_run_reachability_analyzer(source_arn, destination_arn):
                 print(f"Failed to retrieve instance ID for destination ARN: {destination_arn}")
                 return f"Failed to retrieve instance ID for destination ARN: {destination_arn}"
 
-        # Create a Network Insights Path
-        response = client.create_network_insights_path(
-            Source=source_arn,
-            Destination=destination_arn,
-            Protocol='tcp',  # You can specify the protocol (tcp, udp, icmp, etc.)
-            DestinationPort=80  # You can specify the port
-        )
+                # Regular expression to match IPv4 addresses
+        ip_pattern = re.compile(r'^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$')
+        
+        if ip_pattern.match(destination_arn):
+            # If destination_arn is an IP address
+            response = client.create_network_insights_path(
+                Source=source_arn,
+                FilterAtSource={'DestinationAddress': destination_arn},
+                Protocol='tcp'  # You can specify the protocol (tcp, udp, icmp, etc.)
+            )
+        else:
+            # If destination_arn is not an IP address
+            response = client.create_network_insights_path(
+                Source=source_arn,
+                Destination=destination_arn,
+                Protocol='tcp',  # You can specify the protocol (tcp, udp, icmp, etc.)
+                DestinationPort=80  # You can specify the port
+            )
         
         path_id = response['NetworkInsightsPath']['NetworkInsightsPathId']
         print(f"Created Network Insights Path with ID: {path_id}")
