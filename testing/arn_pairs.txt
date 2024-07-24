@@ -1,0 +1,1 @@
+instance_tag_Name%%%Varapp-prod, arn:aws:ec2:ap-east-1:424075490046:transit-gateway-attachment/tgw-attach-01dce24c9315fc3af

@@ -22,6 +22,8 @@ if you have 10 path to test, each time it analysis 10 path. it cost $1
 
 ## deploy
 
+create a sns topic, create a suscription on that topic. copy the sns topic arn to event.json 
+
 zip the reachability-test-lambda.zip
 ```
 zip reachability-test-lambda.zip lambda_function.py event.json

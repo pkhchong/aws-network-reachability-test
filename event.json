@@ -10,4 +10,4 @@
       ]
     ],
     "sns_topic_arn": "arn:aws:sns:ap-east-1:424075490046:reachability-fail-notification"
-  }
+}
