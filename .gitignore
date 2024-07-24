@@ -10,3 +10,4 @@ tmp/
 # ignore env
 env/
 
+reachability-test-lambda.zip
