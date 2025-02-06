@@ -37,3 +37,9 @@ deploy the cloudformation stack
 ```
 ./prod-deploy.sh
 ```
+
+## remove network analysis path 
+ remove network analysis path to provide more space, since there is only 1000 quota per account on number of created network analysis path
+ ```
+ ./python3 removedNetworkAnalyzerPath.py
+ ```
