@@ -3,11 +3,7 @@
       [
         "instance_tag_Name%%%Varapp-prod",
         "arn:aws:ec2:ap-east-1:424075490046:transit-gateway-attachment/tgw-attach-01dce24c9315fc3af"
-      ],
-      [
-        "arn:aws:ec2:ap-east-1:424075490046:transit-gateway/tgw-0285f54acefc9a596",
-        "arn:aws:ec2:ap-east-1:424075490046:transit-gateway-attachment/tgw-attach-0951651d60bf8cb88"
       ]
     ],
-    "sns_topic_arn": "arn:aws:sns:ap-east-1:424075490046:reachability-fail-notification"
+    "sns_topic_arn": "arn:aws:sns:ap-east-1:891377030755:reachability-test-not-reachable-notification"
 }

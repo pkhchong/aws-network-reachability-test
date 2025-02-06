@@ -1,7 +1,7 @@
 [
   {
     "ParameterKey": "LambdaS3Bucket",
-    "ParameterValue": "temp-bucket-for-lambdacodeupload"
+    "ParameterValue": "temp-bucket-for-lambdacodeupload-curapreprod"
   },
   {
     "ParameterKey": "LambdaS3Key",
@@ -9,7 +9,7 @@
   },
   {
     "ParameterKey": "LambdaFunctionName",
-    "ParameterValue": "reachability-test-2"
+    "ParameterValue": "reachability-test"
   },
   {
     "ParameterKey": "LambdaHandler",
